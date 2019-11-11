@@ -64,31 +64,6 @@
             android:textSize="22dp"
             android:textStyle="normal"/>
 
-        <Button
-            android:id="@+id/btnSave"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:background="#3B5998"
-            android:fontFamily="sans-serif"
-            android:textAllCaps="false"
-            android:textColor="#fff"
-            android:textSize="24dp"
-            android:textStyle="normal"/>
-
-        <Button
-            android:id="@+id/btnBack"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:background="#3B5998"
-            android:fontFamily="sans-serif"
-            android:textAllCaps="false"
-            android:textColor="#fff"
-            android:textSize="24dp"
-            android:textStyle="normal"
-            android:text="Close"/>
-
     </LinearLayout>
 
 </ScrollView>

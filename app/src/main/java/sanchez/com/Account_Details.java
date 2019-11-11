@@ -4,8 +4,11 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -17,9 +20,10 @@ public class Account_Details extends AppCompatActivity {
     DatabaseHelper DB;
     EditText txtName,txtUser,txtPass,txtConfirmPass;
     Button btn_details,Back_Application;
-    public String s_id,s_name,s_username,s_pass,btn_save,btn_update;
+    String s_id,s_name,s_username,s_pass,btn_save,btn_update;
     private LayoutInflater inflater;
     ListView lvRecords;
+    Context context;
 
 
     @Override
@@ -50,10 +54,8 @@ public class Account_Details extends AppCompatActivity {
         {
             Bundle bundle = intent.getExtras();
             btn_save = bundle.getString(Intent.EXTRA_TEXT);
-            btn_details.setText(btn_save);
 
             btn_update = bundle.getString(Intent.EXTRA_TEXT);
-            btn_details.setText(btn_update);
 
             s_id = bundle.getString("ID");
             s_name = bundle.getString("Fullname");
@@ -65,59 +67,62 @@ public class Account_Details extends AppCompatActivity {
         txtUser.setText(s_username);
         txtPass.setText(s_pass);
         txtConfirmPass.setText(s_pass);
+    }
+    @Override
+    public boolean onCreateOptionsMenu(Menu menus) {
+        getMenuInflater().inflate(R.menu.menu_bar, menus);
+        return true;
+    }
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int menu_id = item.getItemId();
+        String getName = txtName.getText().toString();
+        String getUser = txtUser.getText().toString();
+        String getPass = txtPass.getText().toString();
+        String getConfirmPass = txtConfirmPass.getText().toString();
+        DB = new DatabaseHelper(this);
+        Boolean chkUsername = DB.chkUser(getUser);
+        if (menu_id==R.id.btnSave){
 
-        Back_Application = (Button)findViewById(R.id.btnBack);
-
-        btn_details.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                String getName = txtName.getText().toString();
-                String getUser = txtUser.getText().toString();
-                String getPass = txtPass.getText().toString();
-                String getConfirmPass = txtConfirmPass.getText().toString();
-                if (getName.isEmpty() || getUser.isEmpty() || getPass.isEmpty() || getConfirmPass.isEmpty()){
-                    Toast.makeText(getApplicationContext(),"All Fields Must Be Required!",Toast.LENGTH_SHORT).show();
-                } else {
-                    if (getPass.equals(getConfirmPass)){
-                            Boolean chkUsername = DB.chkUser(getUser);
-                            if (chkUsername == true) {
-                                if (btn_details.getText().toString().equalsIgnoreCase("Save")) {
-                                    Boolean insert = DB.insert(getName, getUser, getPass);
-                                    if (insert == true) {
-                                        Toast.makeText(getApplicationContext(), "Register Successfully!", Toast.LENGTH_SHORT).show();
-                                        txtName.requestFocus();
-                                        txtName.setText("");
-                                        txtUser.setText("");
-                                        txtPass.setText("");
-                                        txtConfirmPass.setText("");
-                                    }
-                                }else if(btn_details.getText().toString().equalsIgnoreCase("Update"))
-                                {
-                                    final int getID = Integer.parseInt(s_id);
-                                    DB.updateRecords(getID,txtName.getText().toString(),txtUser.getText().toString(),txtPass.getText().toString());
-                                    Toast.makeText(getApplicationContext(),"Records Successfully Update!",Toast.LENGTH_SHORT).show();
-                                    lvRecords = (ListView)findViewById(R.id.lvAccountsRecord);
-                                    Intent i = new Intent(Account_Details.this, Accounts_Record.class);
-                                    startActivityForResult(i, 1);
-                                    finish();
-                                }
+            if (getName.isEmpty()){
+                txtName.setError("This field is required!");
+            } else if (getUser.isEmpty()){
+                txtUser.setError("This field is required!");
+            } else if (getPass.isEmpty()){
+                txtPass.setError("This field is required!");
+            } else if (getConfirmPass.isEmpty()){
+                txtConfirmPass.setError("This field is required!");
+            } else {
+                if (getPass.equals(getConfirmPass)){
+                    if (chkUsername == true) {
+                        if (btn_save.equals("Save_Info")) {
+                            Boolean insert = DB.insert(getName, getUser, getPass);
+                            if (insert == true) {
+                                Toast.makeText(getApplicationContext(), "Register Successfully!", Toast.LENGTH_SHORT).show();
+                                txtName.requestFocus();
+                                txtName.setText("");
+                                txtUser.setText("");
+                                txtPass.setText("");
+                                txtConfirmPass.setText("");
                             }
-                            else
-                                {
-                                    Toast.makeText(getApplicationContext(),"Username Already Exists!",Toast.LENGTH_SHORT).show();
-                                }
-                    } else {
-                        Toast.makeText(getApplicationContext(),"Password Must Be The Same To Confirm Password!",Toast.LENGTH_SHORT).show();
+                        } else if (btn_update.equals("Update_Info")) {
+                            final int getID = Integer.parseInt(s_id);
+                            DB.updateRecords(getID,txtName.getText().toString(),txtUser.getText().toString(),txtPass.getText().toString());
+                            Toast.makeText(getApplicationContext(),"Records Successfully Update!",Toast.LENGTH_SHORT).show();
+                            lvRecords = (ListView)findViewById(R.id.lvAccountsRecord);
+                            finish();
+                            Intent i = new Intent(Account_Details.this, Accounts_Record.class);
+                            startActivityForResult(i, 1);
+                        }
+                    }else {txtUser.setError("Username Already Exists!");}
+                }else {
+                        txtConfirmPass.setError("Password Must Be The Same To Confirm Password!");
                     }
-                }
-            }
-        });
 
-        Back_Application.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                finish();
-            }
-        });
+                }
+            } else if(menu_id==R.id.btnClose){
+            finish();
+        }
+        return super.onOptionsItemSelected(item);
     }
 }

@@ -2,10 +2,14 @@ package sanchez.com;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -23,12 +27,14 @@ import sanchez.Adapters.AdapterRecords;
 import sanchez.Model.Accounts;
 
 public class Accounts_Record extends AppCompatActivity {
+    private static final String TAG = "Accounts_Record";
     Context context;
     DatabaseHelper DB;
     ListView lvRecordLists;
     ArrayList<Accounts> arrayList;
     AdapterRecords adapterRecords;
     Accounts ac;
+    SharedPreferences shared;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,14 +50,18 @@ public class Accounts_Record extends AppCompatActivity {
                         | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
         );
 
+
+        shared = getSharedPreferences("sanchez", context.MODE_PRIVATE);
         arrayList = new ArrayList<>();
         DB = new DatabaseHelper(this);
+        fetch_records();
+    }
+
+    //Display All Accounts Record
+    public void fetch_records(){
         lvRecordLists = findViewById(R.id.lvAccountsRecord);
         arrayList = DB.getAllRecords();
         adapterRecords = new AdapterRecords(this,arrayList);
-
-
-        //Display All Accounts Record
         try {
             lvRecordLists.setAdapter(adapterRecords);
             adapterRecords.notifyDataSetChanged();
@@ -62,7 +72,6 @@ public class Accounts_Record extends AppCompatActivity {
         {
             Toast.makeText(context,e.getMessage(),Toast.LENGTH_SHORT).show();
         }
-
     }
 
     @Override
@@ -75,9 +84,40 @@ public class Accounts_Record extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         int menu_id = item.getItemId();
         if (menu_id==R.id.btnlogout){
-            startActivity(new Intent(this,MainActivity.class));
+            new AlertDialog.Builder(this)
+                    .setTitle("Logout Account...")
+                    .setMessage("Are you sure you want to logout?")
+                    .setPositiveButton("YES", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            shared.edit().remove(DB.TABLE_USERNAME).commit();
+                            Toast.makeText(Accounts_Record.this, "You've been Successfully Logout", Toast.LENGTH_SHORT).show();
+                            startActivity(new Intent(getBaseContext(), MainActivity.class));
+                            Accounts_Record.this.finish();
+                        }
+                    }).setNegativeButton("No", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    dialogInterface.dismiss();
+                }
+            }).show();
         }
         return super.onOptionsItemSelected(item);
     }
+
+    @Override
+    public void onWindowFocusChanged(boolean hasfocus) {
+        super.onWindowFocusChanged(hasfocus);
+       fetch_records();
+    }
+    @Override
+    protected void onResume() {
+        if(!shared.contains(DB.TABLE_USERNAME)) {
+            startActivity(new Intent(getBaseContext(), MainActivity.class));
+            Accounts_Record.this.finish();
+        }
+        super.onResume();
+    }
+
 
 }

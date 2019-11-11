@@ -5,6 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -71,8 +72,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         if (cursor.getCount() > 0) return true;
         else return false;
     }
+    public Boolean userNames(String Usernames){
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT * FROM Register_table where Username=?", new String[]{Usernames});
+        if (cursor.getCount() > 0) return true;
+        else return false;
+    }
 
-    //Display All Accounts Record
+       //Display All Accounts Record
     public ArrayList<Accounts> getAllRecords()
     {
         ArrayList<Accounts> arrayList = new ArrayList<>();

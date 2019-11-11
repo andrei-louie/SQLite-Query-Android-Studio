@@ -2,8 +2,11 @@ package sanchez.com;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -15,7 +18,10 @@ public class MainActivity extends AppCompatActivity {
     DatabaseHelper DB;
     EditText getUsername,getPassword;
     Button Create_Account,Login_Account;
-    public String Save_Info = "Save";
+    public String Save_Info = "Save_Info";
+    SharedPreferences shared;
+    public String setUsername,setPassword;
+    Context context;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,6 +33,7 @@ public class MainActivity extends AppCompatActivity {
         getPassword = (EditText)findViewById(R.id.txtPass);
         Login_Account = (Button)findViewById(R.id.btnlogin);
         Create_Account = (Button)findViewById(R.id.btncreateaccount);
+        shared = getSharedPreferences("sanchez", context.MODE_PRIVATE);
 
         View decorView = getWindow().getDecorView();
         decorView.setSystemUiVisibility(
@@ -41,14 +48,26 @@ public class MainActivity extends AppCompatActivity {
         Login_Account.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String setUsername = getUsername.getText().toString();
-                String setPassword = getPassword.getText().toString();
+                 setUsername = getUsername.getText().toString();
+                 setPassword = getPassword.getText().toString();
                 Boolean chkUsernamePassword = DB.username_password(setUsername,setPassword);
-                if(chkUsernamePassword==true){
-                    Intent i = new Intent(MainActivity.this,Accounts_Record.class);
-                    startActivity(i);
+                Boolean userIdentity = DB.userNames(setUsername);
+                if (setUsername.isEmpty()){
+                    getUsername.setError("This field is required!");
+                }else if (setPassword.isEmpty()){
+                    getPassword.setError("This field is required!");
                 } else {
-                    Toast.makeText(getApplicationContext(),"Invalid Username and Password", Toast.LENGTH_SHORT).show();
+                    if (chkUsernamePassword == true) {
+                        if (userIdentity == true){
+                            SharedPreferences.Editor editor = shared.edit();
+                            editor.putString(DB.TABLE_USERNAME,setUsername).commit();
+                            finish();
+                            Intent i = new Intent(MainActivity.this, Accounts_Record.class);
+                            startActivity(i);
+                        }
+                    } else {
+                        Toast.makeText(getApplicationContext(), "Invalid Username and Password", Toast.LENGTH_SHORT).show();
+                    }
                 }
             }
         });
@@ -67,4 +86,15 @@ public class MainActivity extends AppCompatActivity {
         intent.setType("text/plain");
         startActivity(intent);
     }
+    @Override
+    protected void onResume() {
+        if(shared.contains(DB.TABLE_USERNAME)) {
+            this.finish();
+            Intent i = new Intent(MainActivity.this, Accounts_Record.class);
+            startActivity(i);
+        }
+        super.onResume();
+    }
+
+
 }

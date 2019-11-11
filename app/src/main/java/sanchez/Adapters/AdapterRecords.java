@@ -14,6 +14,8 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.ContentView;
+
 import java.util.ArrayList;
 
 import sanchez.Model.Accounts;
@@ -29,8 +31,10 @@ public class AdapterRecords extends BaseAdapter {
     private Context context;
     private ArrayList<Accounts> arrayList;
     private LayoutInflater inflater;
-    public String Update_Info = "Update";
+    public String Update_Info = "Update_Info";
     DatabaseHelper DB;
+    ListView allrecords;
+    View v;
 
     public AdapterRecords(Context context,ArrayList<Accounts> arrayList){
         this.context = context;
@@ -107,11 +111,11 @@ public class AdapterRecords extends BaseAdapter {
 
                 }
             });
-            holder.ivDeleteItem.setOnClickListener(new View.OnClickListener() {
+        holder.ivDeleteItem.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     try {
-                        AlertDialog alertDialog = new AlertDialog.Builder(context)
+                        final AlertDialog alertDialog = new AlertDialog.Builder(context)
                                 .setTitle("Delete Account Records...")
                                 .setMessage("Do you want to delete this record?")
                                 .setPositiveButton("Delete", new DialogInterface.OnClickListener() {
@@ -119,9 +123,6 @@ public class AdapterRecords extends BaseAdapter {
                                     public void onClick(DialogInterface dialog, int which){
                                         DB.deleteRecords(accounts.getId());
                                         Toast.makeText(context,"Successfully Delete!",Toast.LENGTH_SHORT).show();
-                                        Intent intent = new Intent(context.getApplicationContext(),Accounts_Record.class);
-                                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
-                                        context.getApplicationContext().startActivity(intent);
                                         dialog.dismiss();
                                     }
                                 })
@@ -141,4 +142,5 @@ public class AdapterRecords extends BaseAdapter {
 
         return convertView;
     }
+
 }
